@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# 日志与临时文件
+*.log
+*.swp
+*.swo
+.DS_Store
+
+# 本地工具配置
+.luarc.json
