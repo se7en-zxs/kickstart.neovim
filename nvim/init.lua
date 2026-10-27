@@ -7,3 +7,5 @@
 --   3. lua/config/l10n.lua 在 which-key 就绪后应用中文菜单
 require("config.lazy")
 require("config.l10n").setup()
+-- 自定义键位（config/keymaps.lua），在 LazyVim 与语言模块就绪后加载
+require("config.keymaps")

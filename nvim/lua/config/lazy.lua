@@ -29,7 +29,8 @@ require("lazy").setup({
     -- 保持 false：很多插件的“稳定版”过旧，容易与最新 Neovim 不兼容
     version = false,
   },
-  install = { colorscheme = { "tokyonight", "habamax" } },
+  -- install 时优先安装自定义主题，缺失时回退到 tokyonight / 内置 habamax
+  install = { colorscheme = { "hbx-push-light", "tokyonight", "habamax" } },
   checker = {
     enabled = true, -- 定期检查插件更新
     notify = false, -- 不在右下角弹更新提示
