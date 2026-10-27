@@ -134,7 +134,7 @@ LazyVim 把语言支持、工具集成做成可选项（Extras）：
 | 文件 | 改动 |
 |---|---|
 | `lua/config/options.lua` | 中文消息、编码兼容、Markdown 折行 |
-| `lua/config/l10n.lua` | which-key 中文分组、`<leader>uC` 切换 |
+| `lua/config/l10n.lua` | which-key 分组、dashboard/lualine 词典、`<leader>uM` 切换与持久化 |
 | `lua/plugins/l10n.lua` | dashboard 按钮、lualine 模式名汉化 |
 | `lua/config/lazy.lua` | 关闭 luarocks（无插件依赖）、中文注释 |
 | `lua/config/keymaps.lua` | `<Esc>` 清除搜索高亮 |

@@ -13,8 +13,14 @@
 | ③ 启动页 | dashboard 按钮文字 | `lua/plugins/l10n.lua` |
 | ④ 状态栏 | NORMAL / INSERT 等模式名 | `lua/plugins/l10n.lua` |
 
-切换键：`<leader>uC`（`<Space>uC`）在中文 / English 菜单之间切换。
-**内置消息的语言切换需要重启 Neovim**，which-key 与 dashboard 则会立即更新。
+切换键：`<leader>uM`（`<Space>uM`，M = Menu）在中文 / English 之间切换。
+四层会同时生效，**不需要重启**：内置消息（运行时 `:language`）、which-key 分组、
+dashboard 按钮、lualine 模式名。
+
+选择会写入 `stdpath("state")/kickstart-l10n.json`（通常是
+`~/.local/state/nvim/kickstart-l10n.json`），重开 Neovim 后保持；删掉该文件即恢复默认中文。
+
+> `<leader>uC` 是 LazyVim 的颜色方案选择器，所以这里用 `uM`，避免冲突。
 
 ---
 
@@ -42,22 +48,25 @@ Ubuntu 的 `.deb` 都没有把 `.mo` 一起打包。所以运行：
 
 ### 2.3 配置里的写法
 
-`lua/config/options.lua`：
+`lua/config/options.lua` 只做一件事：让 `lua/config/l10n.lua` 按当前选择设置语言。
 
 ```lua
-local locale_ok = false
-for _, locale in ipairs({ "zh_CN.utf8", "zh_CN.UTF-8", "zh_CN" }) do
-  if pcall(vim.cmd, "language " .. locale) then
-    vim.g.l10n_locale = locale
-    locale_ok = true
-    break
-  end
-end
+require("config.l10n").apply_locale({ notify = true })
 ```
 
-- 逐个尝试，避免某个名称不被系统支持
+`l10n.lua` 内部按顺序尝试 locale，成功即停止：
+
+```lua
+M.locales = {
+  zh = { "zh_CN.utf8", "zh_CN.UTF-8", "zh_CN" },
+  en = { "en_US.utf8", "en_US.UTF-8", "C.UTF-8", "C" }, -- C 一定存在
+}
+```
+
+- 逐个尝试，避免某个名称不被系统支持（否则报 `E197`）
 - 成功时记录到 `vim.g.l10n_locale`，便于 `:lua print(vim.g.l10n_locale)` 排查
 - 失败时只提示，不阻止启动
+- 切换语言时再次调用 `apply_locale()` 即可立即生效，无需重启
 
 ### 2.4 重新生成
 
@@ -118,7 +127,7 @@ end
 { "<leader>z", zh = "我的分组", en = "my group" },
 ```
 
-3. 重启 Neovim，或执行 `:lua require("config.l10n").apply()`
+3. `<leader>uM` 切换语言，或手动执行 `:lua require("config.l10n").apply()`
 
 `expand` / `proxy` 只对 LazyVim 原生有特殊行为的分组（buffer、windows）需要，
 普通分组只写 `zh` / `en` 即可。
@@ -127,40 +136,43 @@ end
 
 ## 4. 启动页（dashboard）
 
-`lua/plugins/l10n.lua` 在 Snacks 初始化前修改 `preset.keys`：
+词典在 `lua/config/l10n.lua` 的 `M.dashboard.zh`，`lua/plugins/l10n.lua` 在 Snacks
+初始化时调用 `l10n.dashboard_desc()` 应用：
 
 ```lua
-local zh = {
-  ["Find File"] = "查找文件",
-  ["New File"] = "新建文件",
-  ["Find Text"] = "查找文本",
-  ["Recent Files"] = "最近文件",
-  ["Config"] = "打开配置",
-  ["Restore Session"] = "恢复会话",
-  ["Lazy Extras"] = "Lazy 扩展",
-  ["Lazy"] = "插件管理",
-  ["Quit"] = "退出",
+M.dashboard = {
+  zh = {
+    ["Find File"] = "查找文件",
+    ["New File"] = "新建文件",
+    ["Find Text"] = "查找文本",
+    ["Recent Files"] = "最近文件",
+    ["Config"] = "打开配置",
+    ["Restore Session"] = "恢复会话",
+    ["Lazy Extras"] = "Lazy 扩展",
+    ["Lazy"] = "插件管理",
+    ["Quit"] = "退出",
+  },
 }
 ```
 
-想加别的按钮或改文案，直接改这张表。
+切换语言时 `M.apply_dashboard()` 会反向映射回英文；如果当时正停在启动页，
+会立即重绘。想加别的按钮或改文案，直接改这张表。
 
 ---
 
 ## 5. 状态栏模式名
 
-lualine 的 `mode` 组件返回 `NORMAL` / `INSERT` 等字符串，这里做映射：
+lualine 的 `mode` 组件返回 `NORMAL` / `INSERT` 等字符串，映射表在
+`lua/config/l10n.lua`（`M.modes_zh`），组件每次都调用 `l10n.mode()`：
 
 ```lua
-local mode_zh = {
-  NORMAL = "普通",
-  INSERT = "插入",
-  VISUAL = "可视",
-  -- ...
+opts.sections.lualine_a = {
+  { "mode", fmt = function(str) return l10n.mode(str) end },
 }
 ```
 
-效果：左下角显示「普通 / 插入 / 可视 / 命令」。
+因此切换语言后只需 `require("lualine").refresh()`，不需要重新 setup。
+效果：左下角显示「普通 / 插入 / 可视 / 命令」，英文模式下回到 `NORMAL` 等。
 
 ---
 
@@ -189,16 +201,23 @@ end, { desc = "示例" })
 
 ## 7. 关闭汉化
 
-- 临时切回英文菜单：`<leader>uC`
-- 永久关闭 which-key 汉化：
+- 随时切换中/英：`<leader>uM`（消息、菜单、启动页、状态栏一起切换，立即生效）
 
-  ```lua
-  -- nvim/lua/config/l10n.lua
-  M.enabled = false
+  选择会持久化；想恢复默认中文，删除状态文件即可：
+
+  ```bash
+  rm -f ~/.local/state/nvim/kickstart-l10n.json
   ```
 
-- 内置消息回到英文：删除 `options.lua` 里的 `language` 循环，或在启动后执行
-  `:language C`
+- 想让新机器默认就是英文：把 `nvim/lua/config/l10n.lua` 里的默认值改掉
+
+  ```lua
+  -- M.enabled = load_enabled()
+  -- if M.enabled == nil then M.enabled = true end
+  if M.enabled == nil then M.enabled = false end
+  ```
+
+  或者安装后按一次 `<leader>uM`，状态会自动保存。
 
 ---
 

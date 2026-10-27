@@ -60,11 +60,13 @@ nvim
 |---|---|
 | Neovim 内置消息（报错、提示） | 官方 `zh_CN.UTF-8.po` → `nvim.mo`，`language zh_CN.utf8` |
 | which-key 分组菜单 | `lua/config/l10n.lua` 覆盖 LazyVim 默认分组名 |
-| 启动页 dashboard 按钮 | `lua/plugins/l10n.lua` 翻译 Snacks dashboard |
+| 启动页 dashboard 按钮 | `lua/config/l10n.lua` 提供词典，`lua/plugins/l10n.lua` 应用 |
 | 状态栏模式名 | lualine 显示「普通 / 插入 / 可视…」 |
-| 中英切换 | `<leader>uC`（`<Space>uC`）随时切回英文菜单 |
+| 中英切换 | `<leader>uM`（`<Space>uM`）一键切换消息、菜单、启动页与状态栏，重启后保持 |
 
 > 第三方插件内部的提示（例如 `:Lazy` 面板、`:help` 文档）仍是英文，这是上游限制。详见 [docs/installation-chinese.md](docs/installation-chinese.md)。
+
+> 语言选择保存在 `~/.local/state/nvim/kickstart-l10n.json`；删掉该文件即恢复默认中文。
 
 ### 已装工具
 
@@ -153,7 +155,8 @@ git add -A && git commit -m "chore: 同步配置" && git push
 | `<Space>e` | 文件浏览器 |
 | `<Space>gg` | lazygit |
 | `<Space>qq` | 退出 |
-| `<Space>uC` | 切换界面语言（中/英） |
+| `<Space>uM` | 切换界面语言（中/英，立即生效并记住选择） |
+| `<Space>uC` | 切换颜色方案（LazyVim 默认键位） |
 | `<Space>?` | 查看当前缓冲区键位 |
 | `:Lazy` | 插件管理 |
 | `:checkhealth` | 环境检查 |

@@ -157,7 +157,7 @@ nvim
 - [ ] `:lua print(vim.g.l10n_locale)` 输出 `zh_CN.utf8`
 - [ ] 输入错误命令（如 `:nosuchcmd`）提示为中文
 - [ ] `<Space>ff` 能打开文件列表
-- [ ] `<Space>uC` 能在中/英菜单间切换
+- [ ] `<Space>uM` 能在中/英界面间切换（消息、菜单、启动页、状态栏全部生效）
 - [ ] `:checkhealth lazyvim` 无红色错误
 
 ---

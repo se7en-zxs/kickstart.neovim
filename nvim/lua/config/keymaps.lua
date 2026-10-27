@@ -11,4 +11,5 @@ map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "清除搜索高亮" })
 -- map("i", "jk", "<Esc>", { desc = "退出插入模式" })
 
 -- 切换界面语言（中/英）的键位在 lua/config/l10n.lua 中注册，
--- 对应 <leader>uC，归入 <leader>u（界面）菜单。
+-- 对应 <leader>uM（M = Menu），归入 <leader>u（界面）菜单。
+-- 注意：<leader>uC 是 LazyVim 的颜色方案选择器，不要占用。

@@ -2,33 +2,15 @@
 -- 本文件由 LazyVim 在 lazy.nvim 启动之前自动加载，适合放“必须尽早生效”的设置。
 
 -- ============================================================================
--- 中文界面
+-- 界面语言（中/英）
 -- ============================================================================
--- Neovim 的内置消息（报错、提示、:messages）由 gettext 翻译。
--- 安装脚本会把官方 zh_CN.UTF-8.po 编译成 nvim.mo，放到 Neovim 安装目录的
--- share/locale/ 下；这里只负责切换到该语言。
+-- 内置消息（报错、提示、:messages）由 gettext 翻译。安装脚本把官方
+-- zh_CN.UTF-8.po 编译成 nvim.mo 放到 Neovim 安装目录的 share/locale/ 下。
 --
--- 注意：必须使用系统真实存在的 locale 名称。Ubuntu/Debian 上通常是
--- zh_CN.utf8（或 zh_CN.UTF-8），只写 zh_CN 可能报 E197。
-local locale_ok = false
-for _, locale in ipairs({ "zh_CN.utf8", "zh_CN.UTF-8", "zh_CN" }) do
-  if pcall(vim.cmd, "language " .. locale) then
-    vim.g.l10n_locale = locale
-    locale_ok = true
-    break
-  end
-end
-
-if not locale_ok then
-  vim.notify_once(
-    "未找到 Neovim 中文语言包（nvim.mo），内置消息将保持英文。\n"
-      .. "可运行 scripts/install.sh 重新安装，或查看 docs/troubleshooting.md。",
-    vim.log.levels.WARN
-  )
-end
-
--- 菜单语言（GUI 菜单；终端下影响不大，但保持一致）
-vim.o.langmenu = "zh_CN"
+-- 语言选择、locale 回退、以及 <leader>uM 运行时切换都由 config/l10n.lua 统一
+-- 管理：默认中文，可切到英文，选择会持久化到 stdpath("state")。
+-- 注意：locale 必须使用系统真实存在的名称，只写 zh_CN 可能报 E197。
+require("config.l10n").apply_locale({ notify = true })
 
 -- ============================================================================
 -- 中文文件与编码
