@@ -70,13 +70,19 @@ M.locales = {
 
 ### 2.4 重新生成
 
-Neovim 升级后，翻译会变化，需要重新编译：
+Neovim 升级后，翻译会变化，需要重新编译。安装脚本会自动解析最新版本并重装语言包：
+
+```bash
+bash scripts/install.sh --force
+```
+
+若固定到某个版本（下面的版本号需与已安装的 Neovim 一致）：
 
 ```bash
 NVIM_VERSION=v0.12.6 bash scripts/install.sh --force
 ```
 
-或手动：
+或手动（把 `v0.12.6` 换成你实际安装的版本）：
 
 ```bash
 curl -fLO https://raw.githubusercontent.com/neovim/neovim/v0.12.6/src/nvim/po/zh_CN.UTF-8.po

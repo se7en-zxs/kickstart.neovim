@@ -3,7 +3,8 @@
 # kickstart.neovim 一键安装脚本
 #
 # 功能：
-#   1. 安装官方 Neovim（默认 v0.12.6）到 ~/.local/opt，并软链到 ~/.local/bin/nvim
+#   1. 安装官方 Neovim（默认自动解析 GitHub 最新 release）到 ~/.local/opt，
+#      并软链到 ~/.local/bin/nvim
 #   2. 编译并安装 Neovim 官方中文语言包（nvim.mo）
 #   3. 把本仓库的 nvim/ 配置链接（默认）或复制到 ~/.config/nvim
 #   4. 首次启动并安装 LazyVim 插件
@@ -13,10 +14,10 @@
 #   bash scripts/install.sh --copy          # 复制配置（改动用 sync-back.sh 同步回仓库）
 #   bash scripts/install.sh --no-nvim       # 使用系统已有的 nvim，不安装官方版本
 #   bash scripts/install.sh --force         # 强制重新下载 Neovim
-#   bash scripts/install.sh --version v0.11.6
+#   bash scripts/install.sh --version v0.11.6   # 手动指定版本（缺省自动用最新）
 #
 # 可用环境变量：
-#   NVIM_VERSION        Neovim 版本（默认 v0.12.6）
+#   NVIM_VERSION        Neovim 版本（缺省自动解析 GitHub 最新 release）
 #   NVIM_TARBALL_URL    自定义下载地址
 #   NVIM_PO_URL         自定义中文 .po 地址
 #   NVIM_PREFIX         安装前缀（默认 ~/.local/opt）
@@ -27,7 +28,8 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-NVIM_VERSION="${NVIM_VERSION:-v0.12.6}"
+# 默认 v0.12.6 的历史固定版本被移除：不指定版本时自动解析 GitHub 最新 release（见 resolve_latest_version）。
+NVIM_VERSION="${NVIM_VERSION:-}"
 NVIM_PREFIX="${NVIM_PREFIX:-$HOME/.local/opt}"
 NVIM_BIN_DIR="${NVIM_BIN_DIR:-$HOME/.local/bin}"
 CONFIG_DIR="${NVIM_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/nvim}"
@@ -62,6 +64,46 @@ fetch() {
     curl -fL --retry 3 --connect-timeout 15 -o "$dest" "$url"
 }
 
+# 解析 Neovim 最新 release 版本号（如 v0.12.6）。
+# 通过“latest 重定向”的 Location 头拿 tag，最可靠且不需要 GitHub API/jq。
+# 与 fetch() 一样：先按当前代理，失败后尝试绕过代理直连 GitHub。
+resolve_latest_version() {
+  local loc ver url="https://github.com/neovim/neovim/releases/latest"
+  loc="$(curl -fsSI --connect-timeout 15 "$url" \
+    | awk 'tolower($1)=="location:"{print $2}')"
+  ver="$(sed -E 's#.*/tag/([^/\r\n]+).*#\1#' <<<"$loc")"
+  if ! [[ "$ver" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    warn "通过当前代理获取最新版失败，尝试直连 GitHub……"
+    loc="$(env no_proxy="$GH_HOSTS" NO_PROXY="$GH_HOSTS" \
+      curl -fsSI --connect-timeout 15 "$url" \
+      | awk 'tolower($1)=="location:"{print $2}')"
+    ver="$(sed -E 's#.*/tag/([^/\r\n]+).*#\1#' <<<"$loc")"
+  fi
+  # 个别代理 / CDN 拿不到 Location，退回 GitHub API（仅此一处依赖 API，无需 jq）
+  if ! [[ "$ver" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    ver="$(curl -fsSL --connect-timeout 15 \
+      https://api.github.com/repos/neovim/neovim/releases/latest \
+      | awk -F'"' '/"tag_name"/{print $4; exit}')"
+  fi
+  printf '%s' "$ver"
+}
+
+# 请求一次能拿到的 Neovim 版本；既没传版本也没解析成功时给出清晰报错
+ensure_nvim_version() {
+  if [[ -z "$NVIM_VERSION" ]]; then
+    local latest
+    log "解析 Neovim 最新 release 版本……"
+    latest="$(resolve_latest_version)" || true
+    if [[ -n "$latest" ]]; then
+      NVIM_VERSION="$latest"
+      ok "最新 Neovim 版本：$latest"
+    else
+      die "无法获取 Neovim 最新版本（网络受限）。
+可手动指定版本重试，例如：bash scripts/install.sh --version v0.12.6"
+    fi
+  fi
+}
+
 usage() {
   cat <<'EOF'
 用法：
@@ -71,10 +113,10 @@ usage() {
   bash scripts/install.sh --no-tools      不安装 ripgrep / fd / fzf / lazygit
   bash scripts/install.sh --no-treesitter 不预装 Treesitter 解析器
   bash scripts/install.sh --force         强制重新下载 Neovim 与工具
-  bash scripts/install.sh --version v0.11.6
+  bash scripts/install.sh --version v0.12.6   指定版本（不指定则自动用最新版）
 
 环境变量：
-  NVIM_VERSION        Neovim 版本（默认 v0.12.6）
+  NVIM_VERSION        Neovim 版本（缺省自动解析 GitHub 最新 release）
   NVIM_TARBALL_URL    自定义 Neovim 下载地址
   NVIM_PO_URL         自定义中文 .po 地址
   NVIM_PREFIX         安装前缀（默认 ~/.local/opt）
@@ -107,11 +149,14 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+[[ "$(id -u)" -ne 0 ]] || die "请用普通用户运行，不要使用 root 或 sudo。"
+
+# 不指定版本时，先解析 GitHub 最新 release；解析成功后才继续
+ensure_nvim_version
+
 NVIM_VERSION="v${NVIM_VERSION#v}"
 NVIM_DIR="$NVIM_PREFIX/nvim-${NVIM_VERSION#v}"
 NVIM_BIN="$NVIM_BIN_DIR/nvim"
-
-[[ "$(id -u)" -ne 0 ]] || die "请用普通用户运行，不要使用 root 或 sudo。"
 [[ "$CONFIG_MODE" == "link" || "$CONFIG_MODE" == "copy" ]] || die "CONFIG_MODE 只能是 link 或 copy"
 for cmd in curl tar git; do
   command -v "$cmd" >/dev/null 2>&1 || die "缺少命令：$cmd"

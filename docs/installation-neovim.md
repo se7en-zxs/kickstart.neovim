@@ -9,12 +9,20 @@
 Ubuntu 仓库的 Neovim 往往落后，而且部分发行版包**没有编译翻译文件**。
 本项目默认：
 
-- 官方 release tarball（v0.12.6）
+- 官方 release tarball（安装脚本默认自动取最新版，如 v0.12.6）
 - 自带 LuaJIT
 - 安装到 `~/.local/opt`，不需要 sudo
 - 中文语言包自行编译，可控、可复现
 
-LazyVim 要求 **Neovim ≥ 0.11.2（LuaJIT 构建）**，v0.12.6 满足要求。
+LazyVim 要求 **Neovim ≥ 0.11.2（LuaJIT 构建）**，最新 release 均满足。
+
+安装脚本 `scripts/install.sh` 不指定版本时会**自动解析 GitHub 最新 release**；也可用
+`--version` / `NVIM_VERSION` 固定到任意版本：
+
+```bash
+bash scripts/install.sh                     # 自动装最新版
+bash scripts/install.sh --version v0.12.6   # 固定某版本
+```
 
 目录约定：
 

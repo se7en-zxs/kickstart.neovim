@@ -29,12 +29,12 @@ bash scripts/install.sh
 
 ### 脚本做了什么
 
-1. 下载 `nvim-linux-<arch>.tar.gz`（默认 v0.12.6）
-2. 解压到 `~/.local/opt/nvim-0.12.6`，创建：
+1. 下载 `nvim-linux-<arch>.tar.gz`（默认自动解析 GitHub 最新 release）
+2. 解压到 `~/.local/opt/nvim-<版本>`，创建：
    - `~/.local/opt/nvim` → 版本目录
    - `~/.local/bin/nvim` → `~/.local/opt/nvim/bin/nvim`
 3. 下载对应版本的 `zh_CN.UTF-8.po`，用 `scripts/po2mo.py` 编译并安装到
-   `~/.local/opt/nvim-0.12.6/share/locale/{zh_CN,zh_CN.utf8}/LC_MESSAGES/nvim.mo`
+   `~/.local/opt/nvim-<版本>/share/locale/{zh_CN,zh_CN.utf8}/LC_MESSAGES/nvim.mo`
 4. 安装 `rg`、`fd`、`fzf`、`lazygit` 到 `~/.local/bin`
 5. 安装 `tree-sitter` CLI（若系统有 npm）
 6. 备份已有 `~/.config/nvim`，然后创建软链接：
@@ -187,11 +187,19 @@ git -C ~/.config/nvim push
 
 ### 更新 Neovim
 
+安装脚本默认自动解析 GitHub 最新 release；要安装到最新版直接：
+
+```bash
+bash scripts/install.sh --force
+```
+
+想固定到某个版本再手动指定（版本号会同时用于对应的中文语言包）：
+
 ```bash
 NVIM_VERSION=v0.12.6 bash scripts/install.sh --force
 ```
 
-同时会重新下载并编译对应版本的中文语言包。
+`--force` 会忽略已存在的版本目录，重新下载并编译对应版本的中文语言包。
 
 ---
 
