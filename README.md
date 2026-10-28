@@ -98,6 +98,8 @@ kickstart.neovim/
 │   ├── treesitter-install.lua       # 预装解析器
 │   ├── sync-back.sh                 # --copy 模式同步回仓库
 │   └── uninstall.sh                 # 保守卸载
+├── lazygit/
+│   └── config.yml                   # lazygit 自定义命令
 └── nvim/                            # 真正的 Neovim 配置目录
     ├── init.lua
     ├── lazy-lock.json
@@ -116,6 +118,7 @@ kickstart.neovim/
 安装完成后：
 
 - `~/.config/nvim` → 仓库的 `nvim/`（软链接）
+- `~/.config/lazygit/config.yml` → 仓库的 `lazygit/config.yml`（软链接）
 - 插件数据在 `~/.local/share/nvim`
 - 因此**在 `~/.config/nvim` 里的任何改动，就是仓库里的改动**，直接 commit / push 即可同步。
 
@@ -139,6 +142,9 @@ git push
 bash scripts/sync-back.sh
 git add -A && git commit -m "chore: 同步配置" && git push
 ```
+
+lazygit 配置始终是文件级软链接：编辑 `~/.config/lazygit/config.yml`
+（指向仓库的 `lazygit/config.yml`），改动直接进入仓库。
 
 换一台机器时，重新 clone 本仓库并执行 `scripts/install.sh` 即可复现。
 

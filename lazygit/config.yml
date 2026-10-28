@@ -1,0 +1,11 @@
+# lazygit 自定义配置
+#
+# 本文件由 kickstart.neovim 仓库管理。
+# 安装脚本会把 ~/.config/lazygit/config.yml 软链接到此处，
+# 因此在这里的修改会直接进入仓库，commit / push 即可同步。
+customCommands:
+  - key: 'T'
+    context: 'global'
+    description: '强制同步远程标签 (fetch --tags --force)'
+    command: 'git fetch --tags --force'
+    loadingText: '强制同步远程标签中...'

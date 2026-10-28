@@ -39,9 +39,11 @@ bash scripts/install.sh
 5. 安装 `tree-sitter` CLI（若系统有 npm）
 6. 备份已有 `~/.config/nvim`，然后创建软链接：
    `~/.config/nvim` → 仓库的 `nvim/`
-7. 执行 `nvim --headless "+Lazy! sync" +qa` 安装插件
-8. 执行 `scripts/treesitter-install.lua` 预装解析器
-9. 验证中文 locale 与配置加载
+7. 备份已有 `~/.config/lazygit/config.yml`，然后软链接到仓库的
+   `lazygit/config.yml`
+8. 执行 `nvim --headless "+Lazy! sync" +qa` 安装插件
+9. 执行 `scripts/treesitter-install.lua` 预装解析器
+10. 验证中文 locale 与配置加载
 
 ### 网络与代理
 

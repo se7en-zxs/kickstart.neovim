@@ -33,6 +33,7 @@ NVIM_VERSION="${NVIM_VERSION:-}"
 NVIM_PREFIX="${NVIM_PREFIX:-$HOME/.local/opt}"
 NVIM_BIN_DIR="${NVIM_BIN_DIR:-$HOME/.local/bin}"
 CONFIG_DIR="${NVIM_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/nvim}"
+LAZYGIT_CONFIG_DIR="${LAZYGIT_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/lazygit}"
 CONFIG_MODE="${CONFIG_MODE:-link}"
 INSTALL_NVIM=1
 INSTALL_TOOLS=1
@@ -122,6 +123,7 @@ usage() {
   NVIM_PREFIX         安装前缀（默认 ~/.local/opt）
   NVIM_BIN_DIR        可执行文件目录（默认 ~/.local/bin）
   NVIM_CONFIG_DIR     配置目录（默认 ~/.config/nvim）
+  LAZYGIT_CONFIG_DIR  lazygit 配置目录（默认 ~/.config/lazygit）
   CONFIG_MODE         link 或 copy（默认 link）
   NVIM_GIT_MODE       auto（默认，直连失败后用代理）/ direct / proxy
 EOF
@@ -338,6 +340,33 @@ deploy_config() {
   fi
 }
 
+# 部署 lazygit 配置：只链接 config.yml 文件，保留该目录下其他本地文件。
+# 这样仓库里的 lazygit/config.yml 就是 ~/.config/lazygit/config.yml 的真身。
+deploy_lazygit_config() {
+  local src="$REPO_DIR/lazygit/config.yml"
+  local dest="$LAZYGIT_CONFIG_DIR/config.yml"
+
+  [[ -f "$src" ]] || return 0
+
+  log "部署 lazygit 配置到 $dest"
+  mkdir -p "$LAZYGIT_CONFIG_DIR"
+
+  if [[ -L "$dest" ]] && [[ "$(readlink -f "$dest")" == "$(readlink -f "$src")" ]]; then
+    ok "lazygit 配置已链接到 $src"
+    return 0
+  fi
+
+  if [[ -e "$dest" || -L "$dest" ]]; then
+    local backup
+    backup="${dest}.bak.$(date +%Y%m%d-%H%M%S)"
+    mv "$dest" "$backup"
+    warn "原 lazygit 配置已备份到 $backup"
+  fi
+
+  ln -sfn "$src" "$dest"
+  ok "$dest -> $src"
+}
+
 # ---------------------------------------------------------------------------
 # 5. 安装插件并验证
 # ---------------------------------------------------------------------------
@@ -454,6 +483,7 @@ fi
 [[ $INSTALL_NVIM -eq 1 ]] && install_locale
 [[ $INSTALL_TOOLS -eq 1 ]] && install_tools
 deploy_config
+deploy_lazygit_config
 bootstrap_plugins
 [[ $INSTALL_TS -eq 1 ]] && install_treesitter
 verify

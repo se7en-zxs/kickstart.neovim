@@ -70,7 +70,42 @@ nvim --headless "+Lazy! sync" "+qa"
 
 ---
 
-## 3. 新增插件
+## 3. lazygit 自定义配置
+
+lazygit 的配置不在 `nvim/` 里，仓库用单独目录管理：
+
+```text
+仓库 lazygit/config.yml  ←→  ~/.config/lazygit/config.yml（软链接）
+```
+
+`install.sh` 会备份已有的 `config.yml`，然后把 `~/.config/lazygit/config.yml`
+软链接到仓库的 `lazygit/config.yml`。之后直接编辑
+`~/.config/lazygit/config.yml`，例如加一个自定义命令：
+
+```yaml
+customCommands:
+  - key: 'T'
+    context: 'global'
+    description: '强制同步远程标签 (fetch --tags --force)'
+    command: 'git fetch --tags --force'
+    loadingText: '强制同步远程标签中...'
+```
+
+保存后提交：
+
+```bash
+git add lazygit/config.yml
+git commit -m "feat(lazygit): 添加强制同步标签命令"
+git push
+```
+
+这里只链接 `config.yml` 一个文件，`~/.config/lazygit/` 下的其他本地文件不会进入仓库。
+如果希望整个 lazygit 配置目录都纳入仓库，可以把 `~/.config/lazygit` 整体软链接到
+仓库的 `lazygit/`，再把不需要入库的文件写进 `.gitignore`。
+
+---
+
+## 4. 新增插件
 
 在 `nvim/lua/plugins/` 下新建文件，例如 `nvim/lua/plugins/comment.lua`：
 
@@ -113,7 +148,7 @@ LazyVim 的插件默认配置在
 
 ---
 
-## 4. 新增键位
+## 5. 新增键位
 
 编辑 `nvim/lua/config/keymaps.lua`：
 
@@ -128,7 +163,7 @@ end, { desc = "示例命令" })
 
 ---
 
-## 5. 启用 LazyVim Extras
+## 6. 启用 LazyVim Extras
 
 ```vim
 :LazyExtras
@@ -147,13 +182,14 @@ git commit -m "feat: 启用 Python / TypeScript extras"
 
 ---
 
-## 6. 哪些文件要提交
+## 7. 哪些文件要提交
 
 | 文件 | 是否提交 | 说明 |
 |---|---|---|
 | `nvim/init.lua`、`lua/**` | ✅ | 配置主体 |
 | `nvim/lazy-lock.json` | ✅ | 固定插件版本，保证可复现 |
 | `nvim/lazyvim.json` | ✅ | Extras 列表 |
+| `lazygit/config.yml` | ✅ | lazygit 自定义配置 |
 | `nvim/.neoconf.json` | ✅ | Lua LSP 配置 |
 | `~/.local/share/nvim/**` | ❌ | 插件数据，不入库 |
 | `~/.local/state/nvim/**` | ❌ | 状态数据 |
@@ -163,7 +199,7 @@ git commit -m "feat: 启用 Python / TypeScript extras"
 
 ---
 
-## 7. 回滚
+## 8. 回滚
 
 ### 回滚配置
 
@@ -189,7 +225,7 @@ mv ~/.config/nvim.bak.20261027-210000 ~/.config/nvim
 
 ---
 
-## 8. 多机同步建议
+## 9. 多机同步建议
 
 - 所有机器统一用软链接模式
 - 每次改完先 `git pull --rebase` 再改，减少冲突
@@ -198,7 +234,7 @@ mv ~/.config/nvim.bak.20261027-210000 ~/.config/nvim
 
 ---
 
-## 9. 提交信息参考
+## 10. 提交信息参考
 
 ```text
 feat: 添加 xxx 插件
