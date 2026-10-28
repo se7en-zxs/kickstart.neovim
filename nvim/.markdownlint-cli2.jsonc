@@ -1,0 +1,10 @@
+{
+  // markdownlint 规则配置
+  // MD013：每行最大字符数。默认 80，对中文段落和表格过于严格；
+  // 放宽到 140 后，headings / code blocks / tables 也会沿用该值。
+  "config": {
+    "MD013": {
+      "line_length": 140
+    }
+  }
+}
