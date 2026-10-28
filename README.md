@@ -53,6 +53,8 @@ nvim
 - **LazyVim**（stable 分支）+ lazy.nvim 插件管理
 - 文件编码兼容：UTF-8 / GB18030 / GBK / Big5
 - Markdown、文本、gitcommit 自动折行
+- 文本类文件默认关闭拼写检查（需要时 `<leader>us` 手动开启）
+- markdownlint 行宽默认 140 字符，避免长行频繁触发 MD013
 
 ### 汉化
 
@@ -101,6 +103,7 @@ kickstart.neovim/
 ├── lazygit/
 │   └── config.yml                   # lazygit 自定义命令
 └── nvim/                            # 真正的 Neovim 配置目录
+    ├── .markdownlint-cli2.jsonc     # markdownlint 规则（行宽 140）
     ├── init.lua
     ├── lazy-lock.json
     ├── lazyvim.json
@@ -109,10 +112,11 @@ kickstart.neovim/
         │   ├── lazy.lua             # lazy.nvim 引导
         │   ├── options.lua          # 中文消息、编码等
         │   ├── keymaps.lua          # 自定义键位
-        │   ├── autocmds.lua         # 自动命令
+        │   ├── autocmds.lua         # 自动命令（复制高亮、关闭拼写检查）
         │   └── l10n.lua             # which-key 汉化 + 中英切换
         └── plugins/
-            └── l10n.lua             # dashboard / lualine 汉化
+            ├── l10n.lua             # dashboard / lualine 汉化
+            └── markdown.lua         # markdownlint 行宽配置
 ```
 
 安装完成后：
@@ -162,6 +166,7 @@ lazygit 配置始终是文件级软链接：编辑 `~/.config/lazygit/config.yml
 | `<Space>gg` | lazygit |
 | `<Space>qq` | 退出 |
 | `<Space>uM` | 切换界面语言（中/英，立即生效并记住选择） |
+| `<Space>us` | 手动开关当前缓冲区的拼写检查（默认关闭） |
 | `<Space>uC` | 切换颜色方案（LazyVim 默认键位） |
 | `<Space>?` | 查看当前缓冲区键位 |
 | `:Lazy` | 插件管理 |

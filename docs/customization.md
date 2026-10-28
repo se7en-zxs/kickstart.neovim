@@ -182,13 +182,30 @@ git commit -m "feat: 启用 Python / TypeScript extras"
 
 ---
 
-## 7. 哪些文件要提交
+## 7. Markdown 行宽与拼写检查
+
+| 项目 | 默认 | 修改位置 |
+|---|---|---|
+| Markdown 行宽（MD013） | 140 字符 | `nvim/.markdownlint-cli2.jsonc` 的 `MD013.line_length` |
+| 文本类文件拼写检查 | 关闭 | `nvim/lua/config/autocmds.lua` 的 `kickstart-disable-spell` |
+
+- `nvim/lua/plugins/markdown.lua` 通过 `--config` 把上述 markdownlint 配置传给
+  nvim-lint 与 conform，因此无论当前工作目录在哪都生效。
+- 如果某个项目自带 `.markdownlint-cli2.jsonc` / `.markdownlint.json`，项目配置优先，
+  会覆盖这里的全局默认。
+- 拼写检查只是默认关闭；需要时按 `<leader>us`（Snacks 的 Spelling 开关）临时开启。
+  想彻底移除该行为，删除 `autocmds.lua` 里的 `kickstart-disable-spell` 自动命令即可。
+
+---
+
+## 8. 哪些文件要提交
 
 | 文件 | 是否提交 | 说明 |
 |---|---|---|
 | `nvim/init.lua`、`lua/**` | ✅ | 配置主体 |
 | `nvim/lazy-lock.json` | ✅ | 固定插件版本，保证可复现 |
 | `nvim/lazyvim.json` | ✅ | Extras 列表 |
+| `nvim/.markdownlint-cli2.jsonc` | ✅ | markdownlint 规则（行宽 140） |
 | `lazygit/config.yml` | ✅ | lazygit 自定义配置 |
 | `nvim/.neoconf.json` | ✅ | Lua LSP 配置 |
 | `~/.local/share/nvim/**` | ❌ | 插件数据，不入库 |
@@ -199,7 +216,7 @@ git commit -m "feat: 启用 Python / TypeScript extras"
 
 ---
 
-## 8. 回滚
+## 9. 回滚
 
 ### 回滚配置
 
@@ -225,7 +242,7 @@ mv ~/.config/nvim.bak.20261027-210000 ~/.config/nvim
 
 ---
 
-## 9. 多机同步建议
+## 10. 多机同步建议
 
 - 所有机器统一用软链接模式
 - 每次改完先 `git pull --rebase` 再改，减少冲突
@@ -234,7 +251,7 @@ mv ~/.config/nvim.bak.20261027-210000 ~/.config/nvim
 
 ---
 
-## 10. 提交信息参考
+## 11. 提交信息参考
 
 ```text
 feat: 添加 xxx 插件

@@ -49,16 +49,18 @@ LazyVim 还会自动加载：
 ```text
 nvim/
 ├── init.lua                 # 入口
+├── .markdownlint-cli2.jsonc # markdownlint 规则（行宽 140）
 ├── lazy-lock.json           # 插件版本锁（要提交）
 ├── lazyvim.json             # 启用的 Extras（要提交）
 ├── lua/config/
 │   ├── options.lua          # 中文消息、编码、折行
 │   ├── keymaps.lua          # 自定义键位
-│   ├── autocmds.lua         # 复制高亮
+│   ├── autocmds.lua         # 复制高亮、关闭拼写检查
 │   ├── lazy.lua             # lazy.nvim 设置
 │   └── l10n.lua             # which-key 汉化与切换
 └── lua/plugins/
-    └── l10n.lua             # dashboard / lualine 汉化
+    ├── l10n.lua             # dashboard / lualine 汉化
+    └── markdown.lua         # markdownlint 行宽配置（140）
 ```
 
 新增插件时，在 `lua/plugins/` 下新建文件并返回 lazy.nvim 规范即可。
@@ -138,7 +140,9 @@ LazyVim 把语言支持、工具集成做成可选项（Extras）：
 | `lua/plugins/l10n.lua` | dashboard 按钮、lualine 模式名汉化 |
 | `lua/config/lazy.lua` | 关闭 luarocks（无插件依赖）、中文注释 |
 | `lua/config/keymaps.lua` | `<Esc>` 清除搜索高亮 |
-| `lua/config/autocmds.lua` | 复制高亮（使用 `vim.hl.on_yank`） |
+| `lua/config/autocmds.lua` | 复制高亮（使用 `vim.hl.on_yank`）、关闭文本类文件拼写检查 |
+| `lua/plugins/markdown.lua` | 让 nvim-lint / conform 使用自定义的 markdownlint 配置 |
+| `.markdownlint-cli2.jsonc` | markdownlint 规则，`MD013` 行宽设为 140 |
 
 其余保持 LazyVim starter 默认，便于跟进上游更新。
 
