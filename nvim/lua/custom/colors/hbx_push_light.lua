@@ -93,6 +93,10 @@ local function ui()
   hl("LineNr",          { fg = pal.fg_dim })
   hl("SignColumn",      { fg = pal.fg_dim, bg = pal.bg })
 
+  -- colorcolumn 竖线；render-markdown 的行内代码/代码块背景默认链接到它
+  -- 默认未定义时会继承到灰色（#9B9EA4），在浅色画布上很刺眼
+  hl("ColorColumn",     { bg = pal.bg_soft })
+
   hl("Visual",          { bg = pal.sel })
   hl("VisualNOS",       { bg = pal.sel })
   hl("Search",          { fg = pal.bg, bg = pal.yellow })
