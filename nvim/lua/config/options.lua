@@ -35,6 +35,35 @@ vim.g.autoformat = false
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
+-- ============================================================================
+-- 剪贴板（OSC 52）
+-- ============================================================================
+-- 让 y/p 默认读写“系统剪贴板”寄存器 +（对应 Windows 宿主机剪贴板）。
+-- 系统剪贴板的实际读写交给正在运行的终端完成（OSC 52 协议），
+-- 无需任何外部桥接程序（如 win32yank / clip.exe）。
+-- 前提：终端必须支持并放行 OSC 52（Windows Terminal 等玳代终端支持）。
+--
+-- 注意：LazyVim 会把 vim.o.clipboard 延迟到 VeryLazy 事件时才恢复
+-- （lazyvim/config/init.lua 中先清空、再在 VeryLazy 恢复），所以这里必须
+-- 也在 VeryLazy 事件内设置，才能覆盖 LazyVim 的恢复值，避免被清空。
+vim.api.nvim_create_autocmd("User", {
+  pattern = "VeryLazy",
+  callback = function()
+    vim.opt.clipboard = "unnamedplus"
+  end,
+})
+vim.g.clipboard = {
+  name = "OSC52",
+  copy = {
+    ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+    ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+  },
+  paste = {
+    ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+    ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+  },
+}
+
 -- 中文排版：超过窗口宽度时按“显示行”换行，而不是按单词硬折行。
 -- 仅在 markdown / text 等长文文件中开启，代码文件保持 LazyVim 默认。
 vim.api.nvim_create_autocmd("FileType", {
